@@ -1,0 +1,19 @@
+Package: groundTemp
+Type: Package
+Title: Make models of ground temperature
+Version: 0.99
+Date: 2014-09-03
+Author: Ian Lyttle <ian.lyttle@schneider-electric.com>
+Maintainer: Ian Lyttle <ian.lyttle@schneider-electric.com>
+Description: Functions to build models for ground temperature
+URL: https://github.com/ijlyttle/groundTemp
+Imports:
+    lubridate
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown,
+    dplyr
+License: MIT
+VignetteBuilder: knitr
+LazyData: true

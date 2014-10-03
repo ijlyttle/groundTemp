@@ -1,0 +1,51 @@
+---
+title: "wx_2011"
+output: html_document
+---
+
+Here, we create a sample dataset.
+
+```{r message = FALSE}
+library(dplyr)
+library(lubridate)
+library(devtools)
+```
+
+Load our data and take a look:
+
+```{r}
+wx_inst <- readRDS("obs_wx_inst.Rds")
+
+glimpse(wx_inst)
+```
+
+We want only from the year 2011, and only these variables:
+
+* `instant` datetime of the observation
+* `tmp_db` dry-bulb temperature (°C)
+* `tmp_wb` wet-bulb temperature (°C)
+* `rel_humid` relative humidity (1)
+* `p_sl` sea-level pressure (Pa)
+
+Apparently, attributes don't sit well with `dplyr`. There has to be a better way to do this, but I'll do it by hand for now.
+
+```{r}
+wx_2011 <- wx_inst %>%
+  select(instant, tmp_db, tmp_wb, rel_humid, p_sl) 
+
+attributes(wx_2011$tmp_db) <- NULL
+attributes(wx_2011$tmp_wb) <- NULL
+attributes(wx_2011$rel_humid) <- NULL
+attributes(wx_2011$p_sl) <- NULL
+
+wx_2011 <- wx_2011 %>%
+  filter(year(instant) == 2011)
+
+glimpse(wx_2011)
+```
+
+Now, we have a dataset that we can add to the package:
+
+```{r}
+use_data(wx_2011, pkg = "..", overwrite = TRUE)
+```
