@@ -13,7 +13,8 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    dplyr
+    dplyr,
+    ggvis
 License: MIT
 VignetteBuilder: knitr
 LazyData: true

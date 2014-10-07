@@ -9,7 +9,7 @@
   \item{tmp_db}{numeric, dry-bulb temperature (°C)}
   \item{tmp_wb}{numeric, wet-bulb temperature, (°C)}
   \item{rel_humid}{numeric, relative humidity (1)}
-  \iten{p_sl}{numeric, sea-level pressure (Pa)}
+  \item{p_sl}{numeric, sea-level pressure (Pa)}
 }}
 \usage{
 wx_2011

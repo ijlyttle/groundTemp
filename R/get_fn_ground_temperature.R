@@ -12,7 +12,7 @@
 #' @param   temp_ref     numeric, mean air temperature for the year (°C) 
 #' @param   dtemp_ref    numeric, amplitude for mean daily air temperature (°C)
 #' @param   time_ref     numeric,  number of days after solstice when min temperature (days) 
-#' @param   diffusivuity (m^2/s) thermal diffusivity (default 1.e-6, P. Begeury suggestion)
+#' @param   diffusivity  (m^2/s) thermal diffusivity (default 1.e-6, P. Begeury suggestion)
 #' 
 #' @return function for ground-temperature
 #' @export

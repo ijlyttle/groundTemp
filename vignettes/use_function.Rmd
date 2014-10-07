@@ -1,0 +1,68 @@
+---
+title: "Ground-Temperature Function"
+author: "Ian Lyttle"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r message = FALSE}
+library(ggvis)
+library(dplyr)
+library(lubridate)
+library(groundTemp)
+```
+
+First steps:
+
+```{r}
+surface_temp_coef <- surface_temp_coef(wx_2011$instant, wx_2011$tmp_db)
+```
+
+```{r}
+alpha <- 1.e-6
+```
+
+```{r}
+gnd_tmp <- 
+  get_fn_ground_temperature(
+    temp_ref = surface_temp_coef$temp_ref,
+    dtemp_ref = surface_temp_coef$dtemp_ref,
+    time_ref = surface_temp_coef$time_ref,
+    diffusivity = alpha
+  )
+
+gnd_tmp
+```
+
+Let's use the function to estimate the ground temperature at 0 m, 1 m, and 3 m.
+
+```{r}
+df <- expand.grid(
+  depth = c(0, 1, 3),
+  instant = ymd("2011-01-01", tz = "America/New_York") + seq(0, 365)*ddays(1)
+)
+```
+
+```{r}
+df <- df %>% mutate(tmp_db = gnd_tmp(instant, depth))
+
+glimpse(df)
+```
+
+Let's plot everything:
+
+```{r}
+wx_2011 %>%
+  ggvis(x = ~instant, y = ~tmp_db) %>%
+  layer_points(fillOpacity := 0.05, size := 10) %>%
+  layer_paths(
+    stroke = ~factor(depth), 
+    strokeWidth := 2,
+    data = df %>% group_by(depth)
+  ) %>%
+  scale_ordinal("stroke", label = "depth (m)")
+```

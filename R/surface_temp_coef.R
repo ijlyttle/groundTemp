@@ -1,4 +1,4 @@
-#' ground_temp_coef
+#' surface_temp_coef
 #' 
 #' Given a vector on instants and a vector of air-temperautures, return a list of
 #' coefficients for the surface temperature.
@@ -12,12 +12,14 @@
 #' @param   temp        numeric ambient air (dry-bulb) temperature
 #' @param   n_hemi      logical, indicates fit for northern hemisphere
 #' 
+#' put in an example!
+#' 
 #' @return  list of coefficients
 #' 
 #' @import lubridate
 #' @export
 #' 
-ground_temp_coef <- function(instant, temp, n_hemi = TRUE){
+surface_temp_coef <- function(instant, temp, n_hemi = TRUE){
   
   # validation ideas:
   # length(instant) == length(time)
@@ -42,13 +44,11 @@ ground_temp_coef <- function(instant, temp, n_hemi = TRUE){
   init <- list(
     temp_ref = temp_ref_init,
     dtemp_ref = dtemp_ref_init,
-    time_ref = time_ref_init
+    time_ref = as.numeric(time_ref_init)
   )
   
   # construct data.frame
   df <- data.frame(time = as.numeric(instant), temp = temp)
-  
-  #  return(df)
   
   # determine model
   nls_model <- nls(formula = formula, data = df, start = init)
@@ -58,7 +58,7 @@ ground_temp_coef <- function(instant, temp, n_hemi = TRUE){
   dtemp_ref <- unname(coef(nls_model)["dtemp_ref"])
   time_ref <- 
     as.POSIXct(
-      unname(coef(nls_model)["dtemp_ref"]), 
+      unname(coef(nls_model)["time_ref"]), 
       origin = lubridate::origin,
       tz = "UTC"
     )

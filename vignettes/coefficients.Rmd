@@ -1,0 +1,90 @@
+---
+title: "Coefficients"
+author: "Ian Lyttle"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r message = FALSE}
+library(ggvis)
+library(dplyr)
+library(lubridate)
+library(groundTemp)
+```
+
+The first step of the ground-temperature modeling process is to fit a sinusoid to an air-temperature dataset. This gives us a model for the surface temperature.
+
+The form of the sinusoid:
+
+\[T(t, 0) = {T_0} + \Delta {T_0}\sin \left( {\frac{{2\pi (t - {t_0})}}{{\Delta {t_0}}} - \frac{\pi }{2}} \right)\]
+
+Symbol   | Description            | Units
+:-------: | :--------------       | :----
+$T$      | Temperature            | °C   
+$T_0$      | Temperature, annual mean            | °C   
+$\Delta T_0$      | Temperature, annual amplitude            | °C   
+$t$      | time, from 1970-01-01 UTC | s
+$t_0$    | time when surface-temperature is at its minimum | s 
+$\Delta t_0$    | duration of a tropical year | s 
+
+Here's a year of temperature data:
+
+```{r}
+ggvis_temp <- 
+  wx_2011 %>%
+  ggvis(x = ~instant, y = ~tmp_db) %>%
+  layer_points(fill := "blue", fillOpacity := 0.1, size := 20) 
+  
+
+ggvis_temp
+```
+
+Let's get the coefficients:
+
+```{r}
+surface_temp_coef <- surface_temp_coef(wx_2011$instant, wx_2011$tmp_db)
+
+surface_temp_coef
+```
+
+Here it is, as a table:
+
+Symbol | Name | Value
+------:|:-----|:-----
+$T_0$  | `temp_ref` | `r surface_temp_coef$temp_ref`
+$\Delta T_0$ | `dtemp_ref` | `r surface_temp_coef$dtemp_ref`
+$t_0$ | `time_ref` | `r surface_temp_coef$time_ref`
+
+We can now use this information to estimate and plot the surface temperature. We will make a function, for now, but we will show how do build the function in a later vignette.
+
+```{r}
+surface_temp <- function(instant){
+  
+  dtime <- as.numeric(instant) - as.numeric(surface_temp_coef$time_ref)
+  
+  phase <- 2*pi*dtime/tropical_year$dtime_ref - pi/2 
+  
+  surface_temp_coef$temp_ref +
+    surface_temp_coef$dtemp_ref*sin(phase)
+  
+}
+
+df_surface <- 
+  data_frame(
+    instant = ymd("2011-01-01", tz = "America/New_York") + seq(0, 365)*ddays(1),
+    tmp_db = surface_temp(instant)
+  )
+```
+
+We superimpose the line for the surface-temperature model.
+
+```{r}
+ggvis_temp %>%
+  layer_paths(stroke := "red", strokeWidth := 2, data = df_surface) 
+```
+
+Now that we have the coefficients for the surface-temperature, the next step is to incorporate the thermal-diffusivity of the ground-material.

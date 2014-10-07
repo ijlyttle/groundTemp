@@ -1,0 +1,66 @@
+---
+title: "Build ground-temperature function"
+author: "Ian Lyttle"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
+```{r message = FALSE}
+library(ggvis)
+library(dplyr)
+library(lubridate)
+library(groundTemp)
+```
+
+Once you have the coefficients for the surface-temperature model, the next step is to determine the reference depth, $z_0$. This reference depth depends on the thermal diffusivity of the ground material, as well as the period, which is defined as a tropical year.
+
+\[{z_0} = \sqrt {\frac{{\alpha \,\Delta {t_0}}}{\pi }} \]
+
+For example, a typical value for thermal diffusivity of concrete is 10-6 m2/s, and is a reasonable value to use for an initial investigation (thanks, Patrick Beguery). Following the math, and keeping in mind that  is a tropical year, this gives us a reference depth of 3.17 m.
+
+Let's put this in the context of the model for ground-temperature:
+
+\[T(t, z) = {T_0} + \Delta {T_0}{e^{ - \frac{z}{{{z_0}}}}}\sin \left( {\frac{{2\pi (t - {t_0})}}{{\Delta {t_0}}} - \frac{z}{{{z_o}}} - \frac{\pi }{2}} \right)\]
+
+The physical meaning of this reference depth is that, at this depth, the amplitude of the sinusoid is  $1/e$ , or about 40%, of the amplitude of the sinusoid at the surface. Further, at this depth, the phase lags the surface phase by one radian, or about one-sixth of the cycle.
+
+Now we have all the information to build a function that will return an estimate for grounf temperature, given a set of surface-temperature coefficients, and thermal diffusivity.
+
+Let's calculate the surface-temperature coefficients:
+
+```{r}
+surface_temp_coef <- surface_temp_coef(wx_2011$instant, wx_2011$tmp_db)
+```
+
+The next step is to choose a thermal diffusivity. Let's consider concrete:
+
+```{r}
+alpha <- 1.e-6
+```
+
+Now, we will build a function that will take as aruguments the depth, $z$ and the time $t$, and return an estimate for the temperature.
+
+```{r}
+gnd_temp <- 
+  get_fn_ground_temperature(
+    temp_ref = surface_temp_coef$temp_ref,
+    dtemp_ref = surface_temp_coef$dtemp_ref,
+    time_ref = surface_temp_coef$time_ref,
+    diffusivity = alpha
+  )
+
+gnd_temp
+```
+
+We will call the function we created to determine the ground temperature given the depth and the instant of time.
+
+We can show the environment for this function, to show where it gets its values for `depth_norm`, etc.
+
+```{r}
+ls.str(environment(gnd_temp))
+```
+

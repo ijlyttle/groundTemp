@@ -12,7 +12,7 @@ get_fn_ground_temperature(temp_ref, dtemp_ref, time_ref, diffusivity = 1e-06)
 
 \item{time_ref}{numeric,  number of days after solstice when min temperature (days)}
 
-\item{diffusivuity}{(m^2/s) thermal diffusivity (default 1.e-6, P. Begeury suggestion)}
+\item{diffusivity}{(m^2/s) thermal diffusivity (default 1.e-6, P. Begeury suggestion)}
 }
 \value{
 function for ground-temperature
